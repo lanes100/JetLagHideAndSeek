@@ -506,13 +506,20 @@ export const Map = ({ className }: { className?: string }) => {
             const overlay = L.geoJSON($permanentOverlay, {
                 interactive: false,
 
-                // @ts-expect-error Type hints force a Layer to be returned, but Leaflet accepts null as well
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                pointToLayer(geoJsonPoint, latlng) {
-                    return null;
+                pointToLayer(feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius: feature.properties?.["marker-radius"] ?? 4,
+                        color: "#ffffff",
+                        weight: 1.5,
+                        opacity: 1,
+                        fillColor: feature.properties?.["marker-color"] ?? "#333333",
+                        fillOpacity: 1,
+                        interactive: false,
+                    });
                 },
 
                 style(feature) {
+                    if (feature?.geometry?.type === "Point") return {};
                     return {
                         color: feature?.properties?.stroke,
                         weight: feature?.properties?.["stroke-width"],
@@ -526,6 +533,13 @@ export const Map = ({ className }: { className?: string }) => {
             overlay.permanentGeoJSON = true;
             overlay.addTo(map);
             overlay.bringToBack();
+            // Ensure dots remain above the route lines even when the overlay
+            // itself is moved behind the other map layers.
+            overlay.eachLayer((layer) => {
+                if (layer instanceof L.CircleMarker) {
+                    layer.bringToFront();
+                }
+            });
         } catch (e) {
             toast.error(`Failed to display GeoJSON overlay: ${e}`);
         }
