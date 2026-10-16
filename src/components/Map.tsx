@@ -509,8 +509,8 @@ export const Map = ({ className }: { className?: string }) => {
                 pointToLayer(feature, latlng) {
                     return L.circleMarker(latlng, {
                         radius: feature.properties?.["marker-radius"] ?? 4,
-                        color: "#ffffff",
-                        weight: 1.5,
+                        color: feature.properties?.["marker-outline-color"] ?? "#ffffff",
+                        weight: feature.properties?.["marker-outline-width"] ?? 1.5,
                         opacity: 1,
                         fillColor: feature.properties?.["marker-color"] ?? "#333333",
                         fillOpacity: 1,
